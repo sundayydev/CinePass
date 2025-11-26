@@ -1,0 +1,91 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11218.70
+MinimumVisualStudioVersion = 17.8.0.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinePass.AppHost", "CinePass.AppHost\CinePass.AppHost.csproj", "{47B0ADDF-B0BD-43E6-A580-154F302BF679}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinePass.ServiceDefaults", "CinePass.ServiceDefaults\CinePass.ServiceDefaults.csproj", "{2F482747-5CB6-4D98-A557-406C51DA87C0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinePass.ApiService", "CinePass.ApiService\CinePass.ApiService.csproj", "{4CEEFF71-862B-489C-9CBF-8025D20D2487}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinePass.Web", "CinePass.Web\CinePass.Web.csproj", "{8273CBE2-6145-413F-B961-5A0AC202B15A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web-Admin", "Web-Admin", "{E44C8DB0-DA15-4F94-AD95-88C264CA3DB7}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "cinema-admin", "cinema-admin\", "{51B67714-B501-B4EA-1DD2-AB49F755736C}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_65444"
+		Debug.AspNetCompiler.PhysicalPath = "cinema-admin\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_65444\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_65444"
+		Release.AspNetCompiler.PhysicalPath = "cinema-admin\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_65444\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "65444"
+		SlnRelativePath = "cinema-admin\"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CinePass.Domain", "CinePass.Domain\CinePass.Domain.csproj", "{983F618A-4D15-4D03-9C85-5A64D1DF92DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CinePass.Core", "CinePass.Core\CinePass.Core.csproj", "{1B21FDA2-4201-480B-8EFA-8CF6E29F4F8D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CinePass.Shared", "CinePass.Shared\CinePass.Shared.csproj", "{D7444F33-A67F-4C90-B102-A4F5C224A2FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47B0ADDF-B0BD-43E6-A580-154F302BF679}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47B0ADDF-B0BD-43E6-A580-154F302BF679}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47B0ADDF-B0BD-43E6-A580-154F302BF679}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47B0ADDF-B0BD-43E6-A580-154F302BF679}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F482747-5CB6-4D98-A557-406C51DA87C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F482747-5CB6-4D98-A557-406C51DA87C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F482747-5CB6-4D98-A557-406C51DA87C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F482747-5CB6-4D98-A557-406C51DA87C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CEEFF71-862B-489C-9CBF-8025D20D2487}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CEEFF71-862B-489C-9CBF-8025D20D2487}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CEEFF71-862B-489C-9CBF-8025D20D2487}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CEEFF71-862B-489C-9CBF-8025D20D2487}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8273CBE2-6145-413F-B961-5A0AC202B15A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8273CBE2-6145-413F-B961-5A0AC202B15A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8273CBE2-6145-413F-B961-5A0AC202B15A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8273CBE2-6145-413F-B961-5A0AC202B15A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51B67714-B501-B4EA-1DD2-AB49F755736C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51B67714-B501-B4EA-1DD2-AB49F755736C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51B67714-B501-B4EA-1DD2-AB49F755736C}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{51B67714-B501-B4EA-1DD2-AB49F755736C}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{983F618A-4D15-4D03-9C85-5A64D1DF92DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{983F618A-4D15-4D03-9C85-5A64D1DF92DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{983F618A-4D15-4D03-9C85-5A64D1DF92DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{983F618A-4D15-4D03-9C85-5A64D1DF92DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B21FDA2-4201-480B-8EFA-8CF6E29F4F8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B21FDA2-4201-480B-8EFA-8CF6E29F4F8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B21FDA2-4201-480B-8EFA-8CF6E29F4F8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B21FDA2-4201-480B-8EFA-8CF6E29F4F8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7444F33-A67F-4C90-B102-A4F5C224A2FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7444F33-A67F-4C90-B102-A4F5C224A2FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7444F33-A67F-4C90-B102-A4F5C224A2FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7444F33-A67F-4C90-B102-A4F5C224A2FC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{51B67714-B501-B4EA-1DD2-AB49F755736C} = {E44C8DB0-DA15-4F94-AD95-88C264CA3DB7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EF9E703D-8D47-4ECC-9703-CF5D79480ADD}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,23 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.0.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>d2d73e15-a4d0-4282-878e-f4c15aa93361</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.0.0" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.0.0" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Minio" Version="9.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CinePass.ApiService\CinePass.ApiService.csproj" />
+    <ProjectReference Include="..\CinePass.Web\CinePass.Web.csproj" />
+  </ItemGroup>
+
+</Project>
