@@ -1,5 +1,6 @@
 ﻿using CinePass.Core.Configurations;
 using CinePass.Domain.Models;
+using CinePass.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace CinePass.Core.Repositories;
@@ -7,8 +8,7 @@ namespace CinePass.Core.Repositories;
 public class CinemaRepository : ICinemaRepository
 {
     private readonly AppDbContext _context;
-
-
+    
     public CinemaRepository(AppDbContext context)
     {
         _context = context;

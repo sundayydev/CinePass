@@ -1,5 +1,5 @@
-﻿using CinePass.Core.Repositories;
-using CinePass.Domain.Models;
+﻿using CinePass.Domain.Models;
+using CinePass.Domain.Repositories;
 using CinePass.Shared.DTOs.Cinema;
 
 namespace CinePass.Core.Services;
@@ -7,8 +7,7 @@ namespace CinePass.Core.Services;
 public class CinemaService
 {
     private readonly ICinemaRepository _repository;
-
-
+    
     public CinemaService(ICinemaRepository repository)
     {
         _repository = repository;
