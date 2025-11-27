@@ -22,4 +22,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CinePass.Domain\CinePass.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
