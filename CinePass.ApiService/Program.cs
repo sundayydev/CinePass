@@ -41,6 +41,8 @@ builder.AddMinioClient("storage");
 // ===============================
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
+builder.Services.AddScoped<CinemaService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
@@ -104,7 +106,7 @@ using (var scope = app.Services.CreateScope())
 // ===============================
 app.UseExceptionHandler();
 app.UseCors();
-
+// app.UseDeveloperExceptionPage();
 if (app.Environment.IsDevelopment())
 {
     // Scalar API Documentation UI
