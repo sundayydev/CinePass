@@ -1,5 +1,5 @@
-﻿using CinePass.Domain.Models;
-using CinePass.Domain.Repositories;
+﻿using CinePass.Domain.IRepository;
+using CinePass.Domain.Models;
 using CinePass.Shared.DTOs.Cinema;
 
 namespace CinePass.Core.Services;

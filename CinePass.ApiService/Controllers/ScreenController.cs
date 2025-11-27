@@ -9,21 +9,18 @@ namespace CinePass.ApiService.Controllers;
 public class ScreenController : ControllerBase
 {
     private readonly ScreenService _service;
-
-
+    
     public ScreenController(ScreenService service)
     {
         _service = service;
     }
-
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         return Ok(await _service.GetAllAsync());
     }
-
-
+    
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -31,16 +28,14 @@ public class ScreenController : ControllerBase
         if (screen == null) return NotFound();
         return Ok(screen);
     }
-
-
+    
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] ScreenRequest request)
     {
         var result = await _service.CreateAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = result.ScreenID }, result);
     }
-
-
+    
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] ScreenRequest request)
     {
@@ -48,8 +43,7 @@ public class ScreenController : ControllerBase
         if (!updated) return NotFound();
         return NoContent();
     }
-
-
+    
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
