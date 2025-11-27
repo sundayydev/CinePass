@@ -1,6 +1,6 @@
 ﻿using CinePass.Domain.Models;
 
-namespace CinePass.Core.Repositories;
+namespace CinePass.Domain.Repositories;
 
 public interface ICinemaRepository
 {

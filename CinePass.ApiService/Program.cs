@@ -2,6 +2,7 @@
 using CinePass.Core.Repositories;
 using CinePass.Core.Services;
 using CinePass.Domain.IRepository;
+using CinePass.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Microsoft.OpenApi;
@@ -43,6 +44,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
 builder.Services.AddScoped<CinemaService>();
+builder.Services.AddScoped<IScreenRepository, ScreenRepository>();
+builder.Services.AddScoped<ScreenService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
