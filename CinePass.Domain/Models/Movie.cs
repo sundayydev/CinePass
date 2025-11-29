@@ -29,7 +29,7 @@ public class Movie
     [MaxLength(500)]
     public required string PosterUrl { get; set; } // URL hoặc path tới ảnh
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<Showtime> Showtimes { get; set; }
 }

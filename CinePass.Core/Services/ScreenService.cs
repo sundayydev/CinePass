@@ -13,7 +13,6 @@ public class ScreenService
         _repository = repository;
     }
 
-
     public async Task<List<ScreenResponse>> GetAllAsync()
     {
         var screens = await _repository.GetAllAsync();
@@ -25,7 +24,6 @@ public class ScreenService
             TotalSeats = s.TotalSeats
         }).ToList();
     }
-
 
     public async Task<ScreenResponse?> GetByIdAsync(int id)
     {
@@ -39,7 +37,6 @@ public class ScreenService
             TotalSeats = screen.TotalSeats
         };
     }
-
 
     public async Task<ScreenResponse> CreateAsync(ScreenRequest request)
     {
@@ -67,30 +64,25 @@ public class ScreenService
         }
     }
 
-
     public async Task<bool> UpdateAsync(int id, ScreenRequest request)
-        {
-            var screen = await _repository.GetByIdAsync(id);
-            if (screen == null) return false;
-
-
-            screen.CinemaID = request.CinemaID;
-            screen.Name = request.Name;
-            screen.TotalSeats = request.TotalSeats;
-
-
-            await _repository.UpdateAsync(screen);
-            return true;
-        }
-
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var screen = await _repository.GetByIdAsync(id);
-            if (screen == null) return false;
-
-
-            await _repository.DeleteAsync(screen);
-            return true;
-        }
+    {
+        var screen = await _repository.GetByIdAsync(id);
+        if (screen == null) return false;
+        
+        screen.CinemaID = request.CinemaID;
+        screen.Name = request.Name;
+        screen.TotalSeats = request.TotalSeats;
+        
+        await _repository.UpdateAsync(screen);
+        return true;
     }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var screen = await _repository.GetByIdAsync(id);
+        if (screen == null) return false;
+        
+        await _repository.DeleteAsync(screen);
+        return true;
+    }
+}

@@ -47,6 +47,8 @@ builder.Services.AddScoped<IScreenRepository, ScreenRepository>();
 builder.Services.AddScoped<ScreenService>();
 builder.Services.AddScoped<ISeatRepository, SeatRepository>();
 builder.Services.AddScoped<SeatService>();
+builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+builder.Services.AddScoped<MovieService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
