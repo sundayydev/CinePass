@@ -11,4 +11,8 @@
     <ProjectReference Include="..\CinePass.Shared\CinePass.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
 </Project>

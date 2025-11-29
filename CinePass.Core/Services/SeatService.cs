@@ -9,7 +9,7 @@ namespace CinePass.Core.Services;
 public class SeatService
 {
     private readonly ISeatRepository _repository;
-    private readonly AppDbContext _context; // for validating Screen existence
+    private readonly AppDbContext _context;
 
     public SeatService(ISeatRepository repository, AppDbContext context)
     {
