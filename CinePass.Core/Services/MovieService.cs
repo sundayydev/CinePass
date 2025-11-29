@@ -13,20 +13,21 @@ public class MovieService
         _repo = repo;
     }
 
-    public async Task<List<MovieResponse>> GetAllAsync()
+    public async Task<IEnumerable<MovieResponse>> GetAllAsync()
     {
         var movies = await _repo.GetAllAsync();
-        return movies.Select(movie => new MovieResponse
+        return movies.Select(m => new MovieResponse
         {
-            MovieID = movie.MovieID,
-            Title = movie.Title,
-            Description = movie.Description,
-            DurationMinutes = movie.DurationMinutes,
-            ReleaseDate = movie.ReleaseDate,
-            Language = movie.Language,
-            Genre = movie.Genre,
-            PosterUrl = movie.PosterUrl,
-        }).ToList();
+            MovieID = m.MovieID,
+            Title = m.Title,
+            Description = m.Description,
+            DurationMinutes = m.DurationMinutes,
+            ReleaseDate = m.ReleaseDate,
+            Language = m.Language,
+            Genre = m.Genre,
+            PosterUrl = m.PosterUrl,
+            CreatedAt = m.CreatedAt
+        });
     }
 
     public async Task<MovieResponse?> GetByIdAsync(int id)
@@ -85,7 +86,7 @@ public class MovieService
     {
         var movie = await _repo.GetByIdAsync(id);
         if (movie == null) return false;
-        
+
         movie.Title = request.Title;
         movie.Description = request.Description;
         movie.DurationMinutes = request.DurationMinutes;
@@ -100,7 +101,7 @@ public class MovieService
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var  movie = await _repo.GetByIdAsync(id);
+        var movie = await _repo.GetByIdAsync(id);
         if (movie == null) return false;
         await _repo.DeleteAsync(id);
         return true;
