@@ -2,10 +2,10 @@
 
 namespace CinePass.Shared.DTOs.Seat;
 
-public class SeatResponse
+public class SeatDto
 {
     public int SeatID { get; set; }
-    public int ScreenID { get; set; }
     public string SeatNumber { get; set; }
-    public SeatType SeatType { get; set; }
+    public string SeatType { get; set; }
+    public bool IsBooked { get; set; }
 }

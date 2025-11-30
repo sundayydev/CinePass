@@ -41,16 +41,22 @@ builder.AddMinioClient("storage");
 // ===============================
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
 builder.Services.AddScoped<CinemaService>();
-builder.Services.AddScoped<IScreenRepository, ScreenRepository>();
-builder.Services.AddScoped<ScreenService>();
-builder.Services.AddScoped<ISeatRepository, SeatRepository>();
-builder.Services.AddScoped<SeatService>();
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 builder.Services.AddScoped<MovieService>();
 builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
 builder.Services.AddScoped<ShowtimeService>();
+builder.Services.AddScoped<ISeatRepository, SeatRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<IBookingDetailRepository, BookingDetailRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<IScreenRepository, ScreenRepository>();
+builder.Services.AddScoped<ScreenService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
@@ -114,7 +120,7 @@ using (var scope = app.Services.CreateScope())
 // ===============================
 app.UseExceptionHandler();
 app.UseCors();
-// app.UseDeveloperExceptionPage();
+app.UseDeveloperExceptionPage();
 if (app.Environment.IsDevelopment())
 {
     // Scalar API Documentation UI

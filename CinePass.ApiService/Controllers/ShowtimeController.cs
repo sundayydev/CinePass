@@ -1,54 +1,81 @@
 ﻿using CinePass.Core.Services;
+using CinePass.Shared.DTOs.Seat;
 using CinePass.Shared.DTOs.Showtime;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CinePass.ApiService.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ShowtimeController : ControllerBase
+public class ShowtimesController : ControllerBase
 {
-    private readonly ShowtimeService _service;
+    private readonly ShowtimeService _showtimeService;
 
-    public ShowtimeController(ShowtimeService service)
+    public ShowtimesController(ShowtimeService showtimeService)
     {
-        _service = service;
+        _showtimeService = showtimeService;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-        => Ok(await _service.GetAllAsync());
+    [HttpGet("movie/{movieId}")]
+    public async Task<ActionResult<IEnumerable<ShowtimeResponse>>> GetByMovie(int movieId)
+    {
+        var showtimes = await _showtimeService.GetShowtimesByMovieAsync(movieId);
+        return Ok(showtimes);
+    }
+
+    [HttpGet("date/{date}")]
+    public async Task<ActionResult<IEnumerable<ShowtimeResponse>>> GetByDate(DateTime date)
+    {
+        var showtimes = await _showtimeService.GetShowtimesByDateAsync(date);
+        return Ok(showtimes);
+    }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<ActionResult<ShowtimeResponse>> GetById(int id)
     {
-        var item = await _service.GetByIdAsync(id);
-        if (item == null) return NotFound(new { message = "Showtime not found" });
-        return Ok(item);
+        var showtime = await _showtimeService.GetShowtimeByIdAsync(id);
+        if (showtime == null)
+            return NotFound(new { message = "Showtime not found" });
+        return Ok(showtime);
     }
 
+    [HttpGet("{id}/seats")]
+    public async Task<ActionResult<SeatMapDto>> GetSeatMap(int id)
+    {
+        var seatMap = await _showtimeService.GetSeatMapAsync(id);
+        if (seatMap == null)
+            return NotFound(new { message = "Showtime not found" });
+        return Ok(seatMap);
+    }
+
+    // [Authorize(Roles = "Admin")]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] ShowtimeRequest request)
+    public async Task<ActionResult<ShowtimeResponse>> Create([FromBody] ShowtimeRequest dto)
     {
-        var created = await _service.CreateAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = created.ShowtimeID }, created);
+        try
+        {
+            var showtime = await _showtimeService.CreateShowtimeAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = showtime.ShowtimeID }, showtime);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] ShowtimeRequest request)
-    {
-        var success = await _service.UpdateAsync(id, request);
-        if (!success) return NotFound(new { message = "Showtime not found" });
-
-        return NoContent();
-    }
-
+    // [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<ActionResult> Delete(int id)
     {
-        var success = await _service.DeleteAsync(id);
-        if (!success) return NotFound(new { message = "Showtime not found" });
-
-        return NoContent();
+        try
+        {
+            await _showtimeService.DeleteShowtimeAsync(id);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

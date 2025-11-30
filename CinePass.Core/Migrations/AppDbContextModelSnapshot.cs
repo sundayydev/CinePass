@@ -40,7 +40,6 @@ namespace CinePass.Core.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PaymentTransactionID")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
