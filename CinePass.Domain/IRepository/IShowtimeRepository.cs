@@ -1,12 +1,14 @@
-﻿using CinePass.Domain.Models;
+﻿using System.Linq.Expressions;
+using CinePass.Domain.Models;
 
 namespace CinePass.Domain.IRepository;
 
-public interface IShowtimeRepository
+public interface IShowtimeRepository : IRepository<Showtime>
 {
-    Task<List<Showtime>> GetAllAsync();
-    Task<Showtime?> GetByIdAsync(int id);
-    Task AddAsync(Showtime showtime);
-    Task UpdateAsync(Showtime showtime);
-    Task DeleteAsync(Showtime showtime);
+    Task<IEnumerable<Showtime>> GetShowtimesByMovieAsync(int movieId);
+    Task<IEnumerable<Showtime>> GetShowtimesByCinemaAsync(int cinemaId);
+    Task<IEnumerable<Showtime>> GetShowtimesByDateAsync(DateTime date);
+    Task<IEnumerable<Showtime>> GetShowtimesByMovieAndDateAsync(int movieId, DateTime date);
+    Task<Showtime> GetShowtimeWithDetailsAsync(int showtimeId);
+    Task<bool> HasOverlappingShowtimeAsync(int screenId, DateTime startTime, DateTime endTime, int? excludeShowtimeId = null);
 }

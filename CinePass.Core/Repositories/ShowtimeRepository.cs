@@ -5,36 +5,79 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CinePass.Core.Repositories;
 
-public class ShowtimeRepository : IShowtimeRepository
+public class ShowtimeRepository : Repository<Showtime>, IShowtimeRepository
 {
-    private readonly AppDbContext _context;
+    public ShowtimeRepository(AppDbContext context) : base(context) { }
 
-    public ShowtimeRepository(AppDbContext context)
+    public async Task<IEnumerable<Showtime>> GetShowtimesByMovieAsync(int movieId)
     {
-        _context = context;
+        return await _dbSet
+            .Include(s => s.Screen)
+                .ThenInclude(sc => sc.Cinema)
+            .Where(s => s.MovieID == movieId && s.StartTime >= DateTime.UtcNow)
+            .OrderBy(s => s.StartTime)
+            .ToListAsync();
     }
 
-    public async Task<List<Showtime>> GetAllAsync()
-        => await _context.Showtimes.Include(s => s.Movie).Include(s => s.Screen).ToListAsync();
-
-    public async Task<Showtime?> GetByIdAsync(int id)
-        => await _context.Showtimes.FirstOrDefaultAsync(s => s.ShowtimeID == id);
-
-    public async Task AddAsync(Showtime showtime)
+    public async Task<IEnumerable<Showtime>> GetShowtimesByCinemaAsync(int cinemaId)
     {
-        _context.Showtimes.Add(showtime);
-        await _context.SaveChangesAsync();
+        return await _dbSet
+            .Include(s => s.Movie)
+            .Include(s => s.Screen)
+            .Where(s => s.Screen.CinemaID == cinemaId && s.StartTime >= DateTime.UtcNow)
+            .OrderBy(s => s.StartTime)
+            .ToListAsync();
     }
 
-    public async Task UpdateAsync(Showtime showtime)
+    public async Task<IEnumerable<Showtime>> GetShowtimesByDateAsync(DateTime date)
     {
-        _context.Showtimes.Update(showtime);
-        await _context.SaveChangesAsync();
+        var startOfDay = date.Date;
+        var endOfDay = startOfDay.AddDays(1);
+
+        return await _dbSet
+            .Include(s => s.Movie)
+            .Include(s => s.Screen)
+                .ThenInclude(sc => sc.Cinema)
+            .Where(s => s.StartTime >= startOfDay && s.StartTime < endOfDay)
+            .OrderBy(s => s.StartTime)
+            .ToListAsync();
     }
 
-    public async Task DeleteAsync(Showtime showtime)
+    public async Task<IEnumerable<Showtime>> GetShowtimesByMovieAndDateAsync(int movieId, DateTime date)
     {
-        _context.Showtimes.Remove(showtime);
-        await _context.SaveChangesAsync();
+        var startOfDay = date.Date;
+        var endOfDay = startOfDay.AddDays(1);
+
+        return await _dbSet
+            .Include(s => s.Screen)
+                .ThenInclude(sc => sc.Cinema)
+            .Where(s => s.MovieID == movieId && 
+                   s.StartTime >= startOfDay && 
+                   s.StartTime < endOfDay)
+            .OrderBy(s => s.StartTime)
+            .ToListAsync();
+    }
+
+    public async Task<Showtime> GetShowtimeWithDetailsAsync(int showtimeId)
+    {
+        return await _dbSet
+            .Include(s => s.Movie)
+            .Include(s => s.Screen)
+                .ThenInclude(sc => sc.Cinema)
+            .FirstOrDefaultAsync(s => s.ShowtimeID == showtimeId);
+    }
+
+    public async Task<bool> HasOverlappingShowtimeAsync(int screenId, DateTime startTime, DateTime endTime, int? excludeShowtimeId = null)
+    {
+        var query = _dbSet.Where(s => 
+            s.ScreenID == screenId &&
+            ((s.StartTime < endTime && s.EndTime > startTime)));
+
+        if (excludeShowtimeId.HasValue)
+        {
+            query = query.Where(s => s.ShowtimeID != excludeShowtimeId.Value);
+        }
+
+        return await query.AnyAsync();
     }
 }

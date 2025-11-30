@@ -1,74 +1,124 @@
 ﻿using CinePass.Domain.IRepository;
 using CinePass.Domain.Models;
+using CinePass.Shared.DTOs.Seat;
 using CinePass.Shared.DTOs.Showtime;
 
 namespace CinePass.Core.Services;
 
 public class ShowtimeService
 {
-    private readonly IShowtimeRepository _repo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ShowtimeService(IShowtimeRepository repo)
+    public ShowtimeService(IUnitOfWork unitOfWork)
     {
-        _repo = repo;
+        _unitOfWork = unitOfWork;
     }
 
-    public async Task<List<ShowtimeResponse>> GetAllAsync()
-        => (await _repo.GetAllAsync()).Select(ToResponse).ToList();
-
-    public async Task<ShowtimeResponse?> GetByIdAsync(int id)
+    public async Task<IEnumerable<ShowtimeResponse>> GetShowtimesByMovieAsync(int movieId)
     {
-        var item = await _repo.GetByIdAsync(id);
-        return item == null ? null : ToResponse(item);
-    }
+        var showtimes = await _unitOfWork.Showtimes.GetShowtimesByMovieAsync(movieId);
+        var result = new List<ShowtimeResponse>();
 
-    public async Task<ShowtimeResponse> CreateAsync(ShowtimeRequest request)
-    {
-        var model = new Showtime()
+        foreach (var showtime in showtimes)
         {
-            MovieID = request.MovieID,
-            ScreenID = request.ScreenID,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
-            Price = request.Price
+            var bookedSeats = await _unitOfWork.BookingDetails.GetBookedSeatIdsForShowtimeAsync(showtime.ShowtimeID);
+            result.Add(MapToDto(showtime, showtime.Screen.TotalSeats - bookedSeats.Count()));
+        }
+
+        return result;
+    }
+
+    public async Task<IEnumerable<ShowtimeResponse>> GetShowtimesByDateAsync(DateTime date)
+    {
+        var showtimes = await _unitOfWork.Showtimes.GetShowtimesByDateAsync(date);
+        var result = new List<ShowtimeResponse>();
+
+        foreach (var showtime in showtimes)
+        {
+            var bookedSeats = await _unitOfWork.BookingDetails.GetBookedSeatIdsForShowtimeAsync(showtime.ShowtimeID);
+            result.Add(MapToDto(showtime, showtime.Screen.TotalSeats - bookedSeats.Count()));
+        }
+
+        return result;
+    }
+
+    public async Task<ShowtimeResponse> GetShowtimeByIdAsync(int id)
+    {
+        var showtime = await _unitOfWork.Showtimes.GetShowtimeWithDetailsAsync(id);
+        if (showtime == null) return null;
+
+        var bookedSeats = await _unitOfWork.BookingDetails.GetBookedSeatIdsForShowtimeAsync(id);
+        return MapToDto(showtime, showtime.Screen.TotalSeats - bookedSeats.Count());
+    }
+
+    public async Task<ShowtimeResponse> CreateShowtimeAsync(ShowtimeRequest dto)
+    {
+        // Check for overlapping showtimes
+        var hasOverlap = await _unitOfWork.Showtimes.HasOverlappingShowtimeAsync(
+            dto.ScreenID, dto.StartTime, dto.EndTime);
+
+        if (hasOverlap)
+            throw new InvalidOperationException("Showtime overlaps with existing showtime");
+
+        var showtime = new Showtime
+        {
+            MovieID = dto.MovieID,
+            ScreenID = dto.ScreenID,
+            StartTime = dto.StartTime,
+            EndTime = dto.EndTime,
+            Price = dto.Price
         };
 
-        await _repo.AddAsync(model);
-        return ToResponse(model);
+        await _unitOfWork.Showtimes.AddAsync(showtime);
+        await _unitOfWork.SaveChangesAsync();
+
+        var result = await _unitOfWork.Showtimes.GetShowtimeWithDetailsAsync(showtime.ShowtimeID);
+        return MapToDto(result, result.Screen.TotalSeats);
     }
 
-    public async Task<bool> UpdateAsync(int id, ShowtimeRequest request)
+    public async Task DeleteShowtimeAsync(int id)
     {
-        var model = await _repo.GetByIdAsync(id);
-        if (model == null) return false;
-
-        model.MovieID = request.MovieID;
-        model.ScreenID = request.ScreenID;
-        model.StartTime = request.StartTime;
-        model.EndTime = request.EndTime;
-        model.Price = request.Price;
-
-        await _repo.UpdateAsync(model);
-        return true;
+        await _unitOfWork.Showtimes.DeleteAsync(id);
+        await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<SeatMapDto> GetSeatMapAsync(int showtimeId)
     {
-        var model = await _repo.GetByIdAsync(id);
-        if (model == null) return false;
+        var showtime = await _unitOfWork.Showtimes.GetShowtimeWithDetailsAsync(showtimeId);
+        if (showtime == null) return null;
 
-        await _repo.DeleteAsync(model);
-        return true;
-    }
+        var seats = await _unitOfWork.Seats.GetSeatsByScreenAsync(showtime.ScreenID);
+        var bookedSeatIds = await _unitOfWork.BookingDetails.GetBookedSeatIdsForShowtimeAsync(showtimeId);
 
-    private ShowtimeResponse ToResponse(Showtime s)
-        => new ShowtimeResponse
+        return new SeatMapDto
         {
-            ShowtimeID = s.ShowtimeID,
-            MovieID = s.MovieID,
-            ScreenID = s.ScreenID,
-            StartTime = s.StartTime,
-            EndTime = s.EndTime,
-            Price = s.Price
+            ScreenID = showtime.ScreenID,
+            ScreenName = showtime.Screen.Name,
+            ShowtimeID = showtimeId,
+            Seats = seats.Select(s => new SeatDto
+            {
+                SeatID = s.SeatID,
+                SeatNumber = s.SeatNumber,
+                SeatType = s.SeatType.ToString(),
+                IsBooked = bookedSeatIds.Contains(s.SeatID)
+            }).ToList()
         };
+    }
+
+    private ShowtimeResponse MapToDto(Showtime showtime, int availableSeats)
+    {
+        return new ShowtimeResponse
+        {
+            ShowtimeID = showtime.ShowtimeID,
+            MovieID = showtime.MovieID,
+            MovieTitle = showtime.Movie?.Title,
+            ScreenID = showtime.ScreenID,
+            ScreenName = showtime.Screen?.Name,
+            CinemaName = showtime.Screen?.Cinema?.Name,
+            StartTime = showtime.StartTime,
+            EndTime = showtime.EndTime,
+            Price = showtime.Price,
+            AvailableSeats = availableSeats
+        };
+    }
 }
