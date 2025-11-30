@@ -23,7 +23,7 @@ public class Booking
     [ForeignKey("ShowtimeID")]
     public Showtime Showtime { get; set; }
 
-    public DateTime BookingTime { get; set; } = DateTime.Now;
+    public DateTime BookingTime { get; set; } = DateTime.UtcNow;
 
     public BookingStatus Status { get; set; } = BookingStatus.Pending;
 
@@ -33,7 +33,7 @@ public class Booking
     public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
 
     [MaxLength(100)]
-    public string PaymentTransactionID { get; set; }
+    public string? PaymentTransactionID { get; set; }
 
     public ICollection<BookingDetail> BookingDetails { get; set; }
     public ICollection<Payment> Payments { get; set; }
