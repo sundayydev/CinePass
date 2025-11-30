@@ -5,44 +5,40 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CinePass.Core.Repositories;
 
-public class MovieRepository : IMovieRepository
+public class MovieRepository : Repository<Movie>, IMovieRepository
 {
-    private readonly AppDbContext _context;
-    
-    public MovieRepository(AppDbContext context)
+    public MovieRepository(AppDbContext context) : base(context) { }
+
+    public async Task<IEnumerable<Movie>> GetNowShowingAsync()
     {
-        _context = context;
+        var now = DateTime.UtcNow;
+        return await _context.Set<Movie>()
+            .Where(m => m.ReleaseDate <= now && 
+                        m.Showtimes.Any(s => s.StartTime >= now))
+            .OrderByDescending(m => m.ReleaseDate)
+            .ToListAsync();
     }
-    
-    public async Task<IEnumerable<Movie>> GetAllAsync()
+
+    public async Task<IEnumerable<Movie>> GetComingSoonAsync()
     {
-        return await _context.Movies.ToListAsync();
+        var now = DateTime.UtcNow;
+        return await _dbSet
+            .Where(m => m.ReleaseDate > now)
+            .OrderBy(m => m.ReleaseDate)
+            .ToListAsync();
     }
-    
-    public async Task<Movie?> GetByIdAsync(int id)
+
+    public async Task<IEnumerable<Movie>> SearchMoviesAsync(string keyword)
     {
-        return await _context.Movies.FirstOrDefaultAsync(m => m.MovieID == id);
+        return await _dbSet
+            .Where(m => m.Title.Contains(keyword) || m.Description.Contains(keyword))
+            .ToListAsync();
     }
-    
-    public async Task<Movie> CreateAsync(Movie movie)
+
+    public async Task<IEnumerable<Movie>> GetMoviesByGenreAsync(string genre)
     {
-        _context.Movies.Add(movie);
-        await _context.SaveChangesAsync();
-        return movie;
-    }
-    
-    public async Task<bool> UpdateAsync(Movie movie)
-    {
-        _context.Movies.Update(movie);
-        return await _context.SaveChangesAsync() > 0;
-    }
-    
-    public async Task<bool> DeleteAsync(int id)
-    {
-        var movie = await GetByIdAsync(id);
-        if (movie == null) return false;
-        
-        _context.Movies.Remove(movie);
-        return await _context.SaveChangesAsync() > 0;
+        return await _dbSet
+            .Where(m => m.Genre == genre)
+            .ToListAsync();
     }
 }

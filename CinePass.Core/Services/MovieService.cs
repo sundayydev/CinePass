@@ -6,34 +6,87 @@ namespace CinePass.Core.Services;
 
 public class MovieService
 {
-    private readonly IMovieRepository _repo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public MovieService(IMovieRepository repo)
+    public MovieService(IUnitOfWork unitOfWork)
     {
-        _repo = repo;
+        _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<MovieResponse>> GetAllAsync()
+    public async Task<IEnumerable<MovieResponse>> GetAllMoviesAsync()
     {
-        var movies = await _repo.GetAllAsync();
-        return movies.Select(m => new MovieResponse
+        var movies = await _unitOfWork.Movies.GetAllAsync();
+        return movies.Select(MapToDto);
+    }
+
+    public async Task<IEnumerable<MovieResponse>> GetNowShowingAsync()
+    {
+        var movies = await _unitOfWork.Movies.GetNowShowingAsync();
+        return movies.Select(MapToDto);
+    }
+
+    public async Task<IEnumerable<MovieResponse>> GetComingSoonAsync()
+    {
+        var movies = await _unitOfWork.Movies.GetComingSoonAsync();
+        return movies.Select(MapToDto);
+    }
+
+    public async Task<MovieResponse> GetMovieByIdAsync(int id)
+    {
+        var movie = await _unitOfWork.Movies.GetByIdAsync(id);
+        return movie != null ? MapToDto(movie) : null;
+    }
+
+    public async Task<MovieResponse> CreateMovieAsync(MovieRequest dto)
+    {
+        var movie = new Movie
         {
-            MovieID = m.MovieID,
-            Title = m.Title,
-            Description = m.Description,
-            DurationMinutes = m.DurationMinutes,
-            ReleaseDate = m.ReleaseDate,
-            Language = m.Language,
-            Genre = m.Genre,
-            PosterUrl = m.PosterUrl,
-            CreatedAt = m.CreatedAt
-        });
+            Title = dto.Title,
+            Description = dto.Description,
+            DurationMinutes = dto.DurationMinutes ?? 0,
+            ReleaseDate = dto.ReleaseDate,
+            Language = dto.Language,
+            Genre = dto.Genre,
+            PosterUrl = dto.PosterUrl
+        };
+
+        await _unitOfWork.Movies.AddAsync(movie);
+        await _unitOfWork.SaveChangesAsync();
+        return MapToDto(movie);
     }
 
-    public async Task<MovieResponse?> GetByIdAsync(int id)
+    public async Task<MovieResponse> UpdateMovieAsync(int id, MovieRequest dto)
     {
-        var movie = await _repo.GetByIdAsync(id);
+        var movie = await _unitOfWork.Movies.GetByIdAsync(id);
         if (movie == null) return null;
+
+        if (!string.IsNullOrEmpty(dto.Title)) movie.Title = dto.Title;
+        if (!string.IsNullOrEmpty(dto.Description)) movie.Description = dto.Description;
+        if (dto.DurationMinutes.HasValue) movie.DurationMinutes = dto.DurationMinutes.Value;
+        if (dto.ReleaseDate.HasValue) movie.ReleaseDate = dto.ReleaseDate;
+        if (!string.IsNullOrEmpty(dto.Language)) movie.Language = dto.Language;
+        if (!string.IsNullOrEmpty(dto.Genre)) movie.Genre = dto.Genre;
+        if (!string.IsNullOrEmpty(dto.PosterUrl)) movie.PosterUrl = dto.PosterUrl;
+
+        await _unitOfWork.Movies.UpdateAsync(movie);
+        await _unitOfWork.SaveChangesAsync();
+        return MapToDto(movie);
+    }
+
+    public async Task DeleteMovieAsync(int id)
+    {
+        await _unitOfWork.Movies.DeleteAsync(id);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<MovieResponse>> SearchMoviesAsync(string keyword)
+    {
+        var movies = await _unitOfWork.Movies.SearchMoviesAsync(keyword);
+        return movies.Select(MapToDto);
+    }
+
+    private MovieResponse MapToDto(Movie movie)
+    {
         return new MovieResponse
         {
             MovieID = movie.MovieID,
@@ -43,67 +96,7 @@ public class MovieService
             ReleaseDate = movie.ReleaseDate,
             Language = movie.Language,
             Genre = movie.Genre,
-            PosterUrl = movie.PosterUrl,
+            PosterUrl = movie.PosterUrl
         };
-    }
-
-    public async Task<MovieResponse> CreateAsync(MovieRequest request)
-    {
-        try
-        {
-            var movie = new Movie()
-            {
-                Title = request.Title,
-                Description = request.Description,
-                DurationMinutes = request.DurationMinutes,
-                ReleaseDate = request.ReleaseDate,
-                Language = request.Language,
-                Genre = request.Genre,
-                PosterUrl = request.PosterUrl,
-            };
-            var result = await _repo.CreateAsync(movie);
-            return new MovieResponse
-            {
-                MovieID = result.MovieID,
-                Title = result.Title,
-                Description = result.Description,
-                DurationMinutes = result.DurationMinutes,
-                ReleaseDate = result.ReleaseDate,
-                Language = result.Language,
-                Genre = result.Genre,
-                PosterUrl = result.PosterUrl,
-                CreatedAt = result.CreatedAt
-            };
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            throw;
-        }
-    }
-
-    public async Task<bool> UpdateAsync(int id, MovieRequest request)
-    {
-        var movie = await _repo.GetByIdAsync(id);
-        if (movie == null) return false;
-
-        movie.Title = request.Title;
-        movie.Description = request.Description;
-        movie.DurationMinutes = request.DurationMinutes;
-        movie.ReleaseDate = request.ReleaseDate;
-        movie.Language = request.Language;
-        movie.Genre = request.Genre;
-        movie.PosterUrl = request.PosterUrl;
-
-        await _repo.UpdateAsync(movie);
-        return true;
-    }
-
-    public async Task<bool> DeleteAsync(int id)
-    {
-        var movie = await _repo.GetByIdAsync(id);
-        if (movie == null) return false;
-        await _repo.DeleteAsync(id);
-        return true;
     }
 }
