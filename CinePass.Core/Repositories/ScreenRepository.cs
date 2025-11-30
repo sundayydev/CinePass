@@ -5,46 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CinePass.Core.Repositories;
 
-public class ScreenRepository : IScreenRepository
+public class ScreenRepository : Repository<Screen>, IScreenRepository
 {
-    private readonly AppDbContext _context;
-    
-    public ScreenRepository(AppDbContext context)
+    public ScreenRepository(AppDbContext context) : base(context) { }
+
+    public async Task<IEnumerable<Screen>> GetScreensByCinemaAsync(int cinemaId)
     {
-        _context = context;
-    }
-    
-    public async Task<List<Screen>> GetAllAsync()
-    {
-        return await _context.Screens.ToListAsync();
+        return await _dbSet
+            .Where(s => s.CinemaID == cinemaId)
+            .ToListAsync();
     }
 
-    public async Task<Screen?> GetByIdAsync(int id)
+    public async Task<Screen> GetScreenWithSeatsAsync(int screenId)
     {
-        return await _context.Screens.FindAsync(id);
-    }
-
-    public async Task<Screen> CreateAsync(Screen screen)
-    {
-        _context.Screens.Add(screen);
-        await _context.SaveChangesAsync();
-        return screen;
-    }
-
-    public async Task UpdateAsync(Screen screen)
-    {
-        _context.Screens.Update(screen);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(Screen screen)
-    {
-        _context.Screens.Remove(screen);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task<bool> ExistsCinemaIdAsync(int id)
-    {
-        return await _context.Cinemas.AnyAsync(u => u.CinemaID == id);
+        return await _dbSet
+            .Include(s => s.Seats)
+            .FirstOrDefaultAsync(s => s.ScreenID == screenId);
     }
 }
