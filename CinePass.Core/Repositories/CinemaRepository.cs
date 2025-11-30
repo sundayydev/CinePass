@@ -5,41 +5,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CinePass.Core.Repositories;
  
-public class CinemaRepository : ICinemaRepository
+public class CinemaRepository : Repository<Cinema>, ICinemaRepository
 {
-    private readonly AppDbContext _context;
-    
-    public CinemaRepository(AppDbContext context)
+    public CinemaRepository(AppDbContext context) : base(context) { }
+
+    public async Task<Cinema> GetCinemaWithScreensAsync(int cinemaId)
     {
-        _context = context;
+        return await _dbSet
+            .Include(c => c.Screens)
+            .FirstOrDefaultAsync(c => c.CinemaID == cinemaId);
     }
-    
-    public async Task<List<Cinema>> GetAllAsync()
+
+    public async Task<IEnumerable<Cinema>> GetCinemasWithMovieAsync(int movieId)
     {
-        return await _context.Cinemas.ToListAsync();
-    }
-    
-    public async Task<Cinema?> GetByIdAsync(int id)
-    {
-        return await _context.Cinemas.FindAsync(id);
-    }
-    
-    public async Task<Cinema> CreateAsync(Cinema cinema)
-    {
-        _context.Cinemas.Add(cinema);
-        await _context.SaveChangesAsync();
-        return cinema;
-    }
-    
-    public async Task UpdateAsync(Cinema cinema)
-    {
-        _context.Cinemas.Update(cinema);
-        await _context.SaveChangesAsync();
-    }
-    
-    public async Task DeleteAsync(Cinema cinema)
-    {
-        _context.Cinemas.Remove(cinema);
-        await _context.SaveChangesAsync();
+        return await _dbSet
+            .Include(c => c.Screens)
+            .Where(c => c.Screens.Any(s => s.Showtimes.Any(st => st.MovieID == movieId)))
+            .ToListAsync();
     }
 }
