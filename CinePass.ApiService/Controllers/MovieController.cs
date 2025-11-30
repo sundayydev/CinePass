@@ -17,8 +17,7 @@ public class MovieController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
-
-
+    
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {

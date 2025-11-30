@@ -2,11 +2,8 @@
 
 namespace CinePass.Domain.IRepository;
 
-public interface ICinemaRepository
+public interface ICinemaRepository : IRepository<Cinema>
 {
-    Task<List<Cinema>> GetAllAsync();
-    Task<Cinema?> GetByIdAsync(int id);
-    Task<Cinema> CreateAsync(Cinema cinema);
-    Task UpdateAsync(Cinema cinema);
-    Task DeleteAsync(Cinema cinema);
+    Task<Cinema> GetCinemaWithScreensAsync(int cinemaId);
+    Task<IEnumerable<Cinema>> GetCinemasWithMovieAsync(int movieId);
 }

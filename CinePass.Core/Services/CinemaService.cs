@@ -1,97 +1,118 @@
 ﻿using CinePass.Domain.IRepository;
 using CinePass.Domain.Models;
 using CinePass.Shared.DTOs.Cinema;
+using CinePass.Shared.DTOs.Screen;
 
 namespace CinePass.Core.Services;
 
 public class CinemaService
 {
-    private readonly ICinemaRepository _repository;
-    
-    public CinemaService(ICinemaRepository repository)
+    private readonly IUnitOfWork _unitOfWork;
+
+    public CinemaService(IUnitOfWork unitOfWork)
     {
-        _repository = repository;
+        _unitOfWork = unitOfWork;
     }
 
-
-    public async Task<List<CinemaResponse>> GetAllAsync()
+    public async Task<IEnumerable<CinemaResponse>> GetAllCinemasAsync()
     {
-        var cinemas = await _repository.GetAllAsync();
-        return cinemas.Select(c => new CinemaResponse
-        {
-            CinemaID = c.CinemaID,
-            Name = c.Name,
-            Address = c.Address,
-            CreatedAt = c.CreatedAt
-        }).ToList();
+        var cinemas = await _unitOfWork.Cinemas.GetAllAsync();
+        return cinemas.Select(MapToDto);
     }
 
-
-    public async Task<CinemaResponse?> GetByIdAsync(int id)
+    public async Task<CinemaResponse> GetCinemaByIdAsync(int id)
     {
-        var cinema = await _repository.GetByIdAsync(id);
+        var cinema = await _unitOfWork.Cinemas.GetByIdAsync(id);
+        return cinema != null ? MapToDto(cinema) : null;
+    }
+
+    public async Task<CinemaResponse> GetCinemaWithScreensAsync(int id)
+    {
+        var cinema = await _unitOfWork.Cinemas.GetCinemaWithScreensAsync(id);
         if (cinema == null) return null;
-
 
         return new CinemaResponse
         {
             CinemaID = cinema.CinemaID,
             Name = cinema.Name,
             Address = cinema.Address,
-            CreatedAt = cinema.CreatedAt
+            Screens = cinema.Screens?.Select(s => new ScreenDto()
+            {
+                CinemaID = s.ScreenID,
+                Name = s.Name,
+                TotalSeats = s.TotalSeats
+            }).ToList()
         };
     }
 
-
-    public async Task<CinemaResponse> CreateAsync(CinemaRequest request)
+    public async Task<IEnumerable<CinemaResponse>> GetCinemasShowingMovieAsync(int movieId)
     {
-        try
+        var cinemas = await _unitOfWork.Cinemas.GetCinemasWithMovieAsync(movieId);
+        return cinemas.Select(c => new CinemaResponse
         {
-            var cinema = new Cinema
+            CinemaID = c.CinemaID,
+            Name = c.Name,
+            Address = c.Address,
+            Screens = c.Screens?.Select(s => new ScreenDto
             {
-                Name = request.Name,
-                Address = request.Address,
-            };
-
-            var result = await _repository.CreateAsync(cinema);
-
-            return new CinemaResponse
-            {
-                CinemaID = result.CinemaID,
-                Name = result.Name,
-                Address = result.Address,
-                CreatedAt = result.CreatedAt
-            };
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine(ex);
-            throw;
-        }
+                CinemaID = s.ScreenID,
+                Name = s.Name,
+                TotalSeats = s.TotalSeats
+            }).ToList()
+        });
     }
 
-
-
-    public async Task<bool> UpdateAsync(int id, CinemaRequest request)
+    public async Task<CinemaResponse> CreateCinemaAsync(CinemaRequest dto)
     {
-        var cinema = await _repository.GetByIdAsync(id);
-        if (cinema == null) return false;
+        var cinema = new Cinema
+        {
+            Name = dto.Name,
+            Address = dto.Address
+        };
 
+        await _unitOfWork.Cinemas.AddAsync(cinema);
+        await _unitOfWork.SaveChangesAsync();
 
-        cinema.Name = request.Name;
-        cinema.Address = request.Address;
-
-
-        await _repository.UpdateAsync(cinema);
-        return true;
+        return MapToDto(cinema);
     }
-    public async Task<bool> DeleteAsync(int id)
+
+    public async Task<CinemaResponse> UpdateCinemaAsync(int id, CinemaRequest dto)
     {
-        var cinema = await _repository.GetByIdAsync(id);
-        if (cinema == null) return false;
+        var cinema = await _unitOfWork.Cinemas.GetByIdAsync(id);
+        if (cinema == null) return null;
 
+        if (!string.IsNullOrWhiteSpace(dto.Name))
+            cinema.Name = dto.Name;
 
-        await _repository.DeleteAsync(cinema);
-        return true;
+        if (!string.IsNullOrWhiteSpace(dto.Address))
+            cinema.Address = dto.Address;
+
+        await _unitOfWork.Cinemas.UpdateAsync(cinema);
+        await _unitOfWork.SaveChangesAsync();
+
+        return MapToDto(cinema);
+    }
+
+    public async Task DeleteCinemaAsync(int id)
+    {
+        // Kiểm tra xem cinema có screens không
+        var cinema = await _unitOfWork.Cinemas.GetCinemaWithScreensAsync(id);
+        if (cinema != null && cinema.Screens != null && cinema.Screens.Any())
+        {
+            throw new InvalidOperationException("Cannot delete cinema with existing screens. Delete screens first.");
+        }
+
+        await _unitOfWork.Cinemas.DeleteAsync(id);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    private CinemaResponse MapToDto(Cinema cinema)
+    {
+        return new CinemaResponse()
+        {
+            CinemaID = cinema.CinemaID,
+            Name = cinema.Name,
+            Address = cinema.Address
+        };
     }
 }
