@@ -1,41 +1,48 @@
 ﻿using CinePass.Core.Configurations;
+using CinePass.Domain;
 using CinePass.Domain.IRepository;
 using CinePass.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CinePass.Core.Repositories;
 
-public class SeatRepository :  ISeatRepository
+public class SeatRepository : Repository<Seat>, ISeatRepository
 {
-    private readonly AppDbContext _context;
-    
-    public SeatRepository(AppDbContext context)
-    {
-        _context = context;
-    }
-    
-    public async Task<List<Seat>> GetAllAsync() => await _context.Seats.Include(s => s.Screen).ToListAsync();
-    
-    public async Task<List<Seat>> GetByScreenIdAsync(int screenId) => await _context.Seats.Where(s => s.ScreenID == screenId).ToListAsync();
+    public SeatRepository(AppDbContext context) : base(context) { }
 
-    public async Task<Seat?> GetByIdAsync(int id) => await _context.Seats.FindAsync(id);
-    
-    public async Task<Seat> CreateAsync(Seat seat)
+    public async Task<IEnumerable<Seat>> GetSeatsByScreenAsync(int screenId)
     {
-        _context.Seats.Add(seat);
-        await _context.SaveChangesAsync();
-        return seat;
+        return await _dbSet
+            .Where(s => s.ScreenID == screenId)
+            .OrderBy(s => s.SeatNumber)
+            .ToListAsync();
     }
-    
-    public async Task UpdateAsync(Seat seat)
+
+    public async Task<IEnumerable<Seat>> GetAvailableSeatsForShowtimeAsync(int showtimeId)
     {
-        _context.Seats.Update(seat);
-        await _context.SaveChangesAsync();
+        var bookedSeatIds = await _context.Set<BookingDetail>()
+            .Where(bd => bd.Booking.ShowtimeID == showtimeId &&
+                         bd.Booking.Status != BookingStatus.Cancelled)
+            .Select(bd => bd.SeatID)
+            .ToListAsync();
+
+        var showtime = await _context.Set<Showtime>().FindAsync(showtimeId);
+        
+        return await _dbSet
+            .Where(s => s.ScreenID == showtime.ScreenID && 
+                        !bookedSeatIds.Contains(s.SeatID))
+            .ToListAsync();
     }
-    
-    public async Task DeleteAsync(Seat seat)
+
+    public async Task<bool> AreSeatAvailableAsync(List<int> seatIds, int showtimeId)
     {
-        _context.Seats.Remove(seat);
-        await _context.SaveChangesAsync();
+        var bookedSeatIds = await _context.Set<BookingDetail>()
+            .Where(bd => bd.Booking.ShowtimeID == showtimeId &&
+                         bd.Booking.Status != BookingStatus.Cancelled &&
+                         seatIds.Contains(bd.SeatID))
+            .Select(bd => bd.SeatID)
+            .ToListAsync();
+
+        return !bookedSeatIds.Any();
     }
 }
